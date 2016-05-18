@@ -178,7 +178,6 @@ class GroupSum(object):
     def __repr__(self):
         return str(self.sum)
 
-
 class GreyStatistics(object):
 
     def __init__(self):
