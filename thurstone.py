@@ -162,6 +162,14 @@ class Thurstone(object):
         self.step2()
         return self.weights
 
+class FunctionItem(object):
+    def __init__(self,id,value):
+        self.id=id
+        self.value=value
+
+    def __repr__(self):
+        return str(self.value)
+
 class GroupSum(object):
     def __init__(self,id,sum):
         self.id=id
@@ -183,14 +191,16 @@ class GreyStatistics(object):
         self.survey=self.test_survey()
         self.functions=self.compute_functions()
 
-
     def test_survey(self):
         return [8, 6, 10, 8, 10, 4, 4, 2, 10, 10, 8, 10, 8, 2, 8, 8, 10, 10, 8, 6, 2, 8, 4, 10, 8, 10, 10]
     def compute_functions(self):
-        return [[(item/(self.groupsThreshold*i) if item<=(self.groupsThreshold*i) else (10-item)/(self.groupsThreshold*(self.groupsAmount-i)))*weight for item,weight in zip(self.survey,self.weights)] for i in range(1,self.groupsAmount+1)]
+        return [[FunctionItem(id,(item/(self.groupsThreshold*i) if item <= (self.groupsThreshold*i) else (10-item)/(self.groupsThreshold*(self.groupsAmount-i)))*self.weights[id]) for id,item in enumerate(self.survey)] for i in range(1,self.groupsAmount+1)]
     def choose_group(self):
-        return max([GroupSum(i+1,sum(item for item in function)) for i,function in enumerate(self.functions)],key=lambda x:x.sum)
-obiekt=Thurstone()
+        return max([GroupSum(i+1,sum(item.value for item in function)) for i,function in enumerate(self.functions)],key=lambda x:x.sum).id
+    def most_important_criteria(self):
+        return sorted(self.functions[self.choose_group()-1],key=lambda x:x.value,reverse=True)[0:4]
+
+obiekt = Thurstone()
 obiekt.drawingMatrix=obiekt.test_data()
 obiekt.get_weights()
 #obiekt.display_matrix(obiekt.averagesMatrix)
@@ -200,3 +210,4 @@ obiekt.get_weights()
 stat=GreyStatistics()
 #print stat.compute_functions()
 print stat.choose_group()
+print stat.most_important_criteria()
